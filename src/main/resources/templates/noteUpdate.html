@@ -40,27 +40,21 @@
     <script>
         var putMethod = (event) => {
             event.preventDefault();
+
             var button = document.querySelectorAll("[name=update_data]");
             var url = button[0].getAttribute("resource")
-            var messages = document.querySelectorAll("[class=form-content]");
+
             var body = {};
-            messages.forEach(element => {
-                var name = element.getAttribute("name");
-                if (element.tagName != "TEXTAREA") {
-                    var value = element.value;
-                } else {
-                    // if element is textarea, value attribute may return null or undefined
-                    var value = element.innerHTML;
+            body[document.getElementById("id").name] = document.getElementById("id").value;
+            body[document.getElementById("name").name] = document.getElementById("name").value;
+            body[document.getElementById("content").name] = document.getElementById("content").value;
+            var radioButtons = document.querySelectorAll("[type=radio]");
+            radioButtons.forEach(e =>{
+                if (e.checked){
+                    body[e.name] = e.value;
                 }
-                body[name] = value;
+
             })
-            {
-                var e = document.querySelectorAll("[class=form-select]")[0];
-                if (typeof e !== 'undefined') {
-                    var name = e.getAttribute("name");
-                    body[name] = e.value;
-                }
-            }
             var xhr = new XMLHttpRequest();
             xhr.open("PUT", url);
             xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
@@ -68,8 +62,6 @@
                 if (xhr.status === 200) {
                     var button = document.querySelectorAll("[name=update_data]");
                     button[0].innerHTML = "Updated!"
-                } else if (xhr.status === 403) {
-                    alert("Access denied!")
                 } else {
                     console.log(xhr.status, xhr.responseText);
                 }
