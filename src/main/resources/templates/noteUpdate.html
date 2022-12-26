@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout}">
+<head>
+    <title>Update Note</title>
+</head>
+
+<body>
+
+<section layout:fragment="content">
+    <form id="formEdit" th:object="${note}">
+        <input type="text" hidden class="form-content" th:field="*{id}" id="id">
+
+        <label for="name">Name</label>
+        <input type="text" class="form-content" th:field="*{name}" id="name" placeholder="Name">
+        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+
+        <label for="content" class="form-label">Note's content:</label>
+        <textarea class="form-content" id="content" rows="5"
+                  name="content"
+                  placeholder="Description" th:field="*{content}"
+                  required="required"></textarea>
+        <ul>
+            <li th:each="access : ${accessTypes}">
+                <input type="radio" class="form-content" th:field="*{accessType}" th:value="${access}"
+                       th:text="${access}"/>
+            </li>
+        </ul>
+
+        <button class="btn btn-secondary update_data" type="submit" name="update_data"
+                th:attr="resource=|/notes/${note.id}|">
+            Update note
+        </button>
+    </form>
+
+</section>
+
+<th:block layout:fragment="script">
+    <script>
+        var putMethod = (event) => {
+            event.preventDefault();
+            var button = document.querySelectorAll("[name=update_data]");
+            var url = button[0].getAttribute("resource")
+            var messages = document.querySelectorAll("[class=form-content]");
+            var body = {};
+            messages.forEach(element => {
+                var name = element.getAttribute("name");
+                if (element.tagName != "TEXTAREA") {
+                    var value = element.value;
+                } else {
+                    // if element is textarea, value attribute may return null or undefined
+                    var value = element.innerHTML;
+                }
+                body[name] = value;
+            })
+            {
+                var e = document.querySelectorAll("[class=form-select]")[0];
+                if (typeof e !== 'undefined') {
+                    var name = e.getAttribute("name");
+                    body[name] = e.value;
+                }
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.open("PUT", url);
+            xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    var button = document.querySelectorAll("[name=update_data]");
+                    button[0].innerHTML = "Updated!"
+                } else if (xhr.status === 403) {
+                    alert("Access denied!")
+                } else {
+                    console.log(xhr.status, xhr.responseText);
+                }
+            }
+            xhr.send(JSON.stringify(body));
+        }
+
+        document.querySelectorAll("[name=update_data]").forEach(element => {
+            element.addEventListener("click", putMethod);
+        })
+    </script>
+</th:block>
+</body>
+</html>
